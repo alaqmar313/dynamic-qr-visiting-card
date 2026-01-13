@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from qr_app.views import home, view_card
+from qr_project.qr_app.views import home, view_card
 from django.shortcuts import render
 
 
