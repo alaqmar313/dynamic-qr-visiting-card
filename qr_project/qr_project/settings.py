@@ -14,7 +14,11 @@ from pathlib import Path
 
 import os
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
+#SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = os.getenv(
+    "SECRET_KEY",
+    "django-insecure-dev-only-1234567890"
+)
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -28,19 +32,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 #SECRET_KEY = 'django-insecure-6p0awcj0jrf@2vethqaemasthacjben=(k5wn1-4cqdgnyr)t+'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = True
+DEBUG = False
 
-DEBUG = os.environ.get("DEBUG") == "True"
+#DEBUG = os.environ.get("DEBUG") == "True"
 
 
-#ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "dynamic-qr-visiting-card-1.onrender.com"
+]
+'''
 ALLOWED_HOSTS = [
     "dynamic-qr-visiting-card-1.onrender.com",
     "127.0.0.1",
     "localhost",
     ".onrender.com",
 ]
-
+'''
 
 # Application definition
 
@@ -51,7 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'qr_project.qr_app',
+    'qr_app',
 ]
 
 MIDDLEWARE = [
@@ -64,7 +71,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'qr_project.qr_project.urls'
+ROOT_URLCONF = 'qr_project.urls'
 
 TEMPLATES = [
     {
@@ -73,6 +80,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
