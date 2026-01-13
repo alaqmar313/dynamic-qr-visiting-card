@@ -1,0 +1,150 @@
+{% extends "qr_app/base.html" %}
+
+{% block title %}Generate Dynamic QR{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- HERO -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Dynamic Visiting Card QR</h2>
+        <p class="text-muted">Create once. Update anytime.</p>
+    </div>
+
+    <div class="row g-4 align-items-start">
+
+        <!-- LEFT: FORM -->
+        <div class="col-md-6">
+            <div class="card shadow-lg rounded-4 p-4 h-100">
+
+                <h5 class="mb-3">Enter Visiting Card Details</h5>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <input type="text" name="name" class="form-control" placeholder="Full Name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="text" name="phone" class="form-control" placeholder="Phone Number" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="email" name="email" class="form-control" placeholder="Email Address">
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="text" name="company" class="form-control" placeholder="Company Name">
+                    </div>
+
+                    <div class="mb-3">
+                        <textarea name="address" class="form-control" placeholder="Address"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary">
+                            Generate Dynamic QR
+                        </button>
+
+                        <a href="{% url 'scan_image' %}" class="btn btn-outline-secondary">
+                            Scan QR from Image
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+
+<!-- RIGHT: QR RESULT -->
+<div class="col-md-6">
+    <div class="card shadow-lg rounded-4 p-4 h-100 text-center">
+
+        <h5 class="mb-3">QR Preview</h5>
+
+        {% if qr_code %}
+            <img id="qrImage"
+                 src="data:image/png;base64,{{ qr_code }}"
+                 class="img-fluid mb-3"
+                 style="max-width:220px;">
+
+            <!-- Scan Button -->
+            <div class="d-grid gap-2 mb-3">
+                <button class="btn btn-outline-primary" onclick="triggerScan()">
+                    🔍 Scan QR
+                </button>
+
+                <a href="data:image/png;base64,{{ qr_code }}"
+                   download="visiting_card_qr.png"
+                   class="btn btn-success">
+                    Download QR
+                </a>
+            </div>
+
+            <!-- Hidden File Input -->
+            <input type="file"
+                   id="scanInput"
+                   accept="image/*"
+                   hidden>
+
+            <!-- Scan Result -->
+            <div id="scanResult" class="text-start mt-3" style="display:none;">
+                <h6 class="fw-bold">Scanned Details</h6>
+                <pre id="scanText"
+                     class="bg-light p-3 rounded border small"></pre>
+            </div>
+
+        {% else %}
+            <p class="text-muted mt-4">
+                QR will appear here after generation
+            </p>
+        {% endif %}
+
+    </div>
+</div>
+
+    </div>
+</div>
+
+<script>
+function triggerScan() {
+    document.getElementById("scanInput").click();
+}
+
+document.getElementById("scanInput")?.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = e => img.src = e.target.result;
+
+    img.onload = function () {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+        const resultBox = document.getElementById("scanResult");
+        const resultText = document.getElementById("scanText");
+
+        if (code) {
+            resultText.textContent = code.data;
+            resultBox.style.display = "block";
+        } else {
+            resultText.textContent = "❌ No QR code detected";
+            resultBox.style.display = "block";
+        }
+    };
+
+    reader.readAsDataURL(file);
+});
+</script>
+
+{% endblock %}

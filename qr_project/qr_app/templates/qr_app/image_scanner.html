@@ -1,0 +1,48 @@
+{% extends "qr_app/base.html" %}
+
+{% block title %}Scan QR{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h3 class="fw-bold mb-3">Scan QR from Image</h3>
+    <p class="text-muted">Upload a QR image to decode it</p>
+
+    <div class="card shadow p-4 mx-auto" style="max-width:400px;">
+        <input type="file" id="fileInput" accept="image/*" class="form-control mb-3">
+        <canvas id="canvas" hidden></canvas>
+
+        <p class="fw-semibold">Result:</p>
+        <p id="result" class="text-success"></p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+<script>
+    const fileInput = document.getElementById("fileInput");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    fileInput.addEventListener("change", function () {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        const img = new Image();
+        const reader = new FileReader();
+
+        reader.onload = e => img.src = e.target.result;
+
+        img.onload = function () {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+            document.getElementById("result").innerText =
+                code ? code.data : "No QR found";
+        };
+
+        reader.readAsDataURL(file);
+    });
+</script>
+{% endblock %}
